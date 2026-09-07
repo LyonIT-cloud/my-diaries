@@ -1,20 +1,349 @@
-{
-  "2026": [
-    { "date": "APR 20", "title": "引力維度", "content": "愛是唯一能超越時空的維度。" },
-    { "date": "APR 25", "title": "星海漫遊", "content": "今天我們在那顆藍色的星球附近停留。" }
-  ],
-  "2025": [
-    { "date": "DEC 31", "title": "跨年", "content": "這是我們相遇後的第二次跨年。" }
-  ],
-  "2024": [
-    { "date": "MAY 20", "title": "白", "content": "那些沒說出口的話，星空都幫我記住了。" }
-  ],
-  "2023": [
-    { "date": "OCT 12", "title": "遇見", "content": "故事的起點，風很溫柔。" }
-    { "date": "OCT 12", "title": "遇見", "content": "故事的起點，風很溫柔。" }
-    { "date": "OCT 12", "title": "遇見", "content": "故事的起點，風很溫柔。" }
-  ]
-  ]
-  
-  ]
-}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>言心 | 浪漫星際事務所</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@200;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-light: #f9f6f1;
+            --accent: #d4af37;
+            --shelf-wood: #0a0a0a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glow: rgba(212, 175, 55, 0.2);
+            --paper: rgba(255, 253, 248, 0.98);
+        }
+
+        body, html { margin: 0; padding: 0; font-family: 'Noto Serif TC', serif; height: 100%; overflow: hidden; background: #000; color: #fff; }
+        
+        /* 基礎星塵畫布 */
+        #starfield { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        /* --- 扉頁層 --- */
+        #homeLayer {
+            position: absolute; width: 100%; height: 100%; background-color: var(--bg-light);
+            background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; transition: 1.2s cubic-bezier(0.4, 0, 0.2, 1); text-align: center;
+        }
+        #homeLayer h1 { font-size: 3.5rem; letter-spacing: 25px; font-weight: 200; color: #1a1a1a; }
+        .enter-btn { padding: 15px 40px; border: 1px solid #a69d94; color: #a69d94; cursor: pointer; letter-spacing: 10px; margin-top: 40px; transition: 0.4s; }
+        .enter-btn:hover { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+
+        /* --- 事務所 3D 空間 --- */
+        #officeLayer {
+            position: absolute; width: 100%; height: 100%; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; opacity: 0; transition: 1.5s; perspective: 3000px;
+            overflow: hidden;
+        }
+
+        /* 強化背景動態：慢速縮放與位移 */
+        #officeLayer::before {
+            content: "";
+            position: absolute;
+            top: -10%; left: -10%; width: 120%; height: 120%;
+            background-image: url('https://images.unsplash.com/photo-1464802686167-b939a67e06a1?q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            animation: bgFluidMove 60s infinite alternate ease-in-out;
+        }
+
+        @keyframes bgFluidMove {
+            0% { transform: scale(1) translate(0, 0); }
+            50% { transform: scale(1.1) translate(-2%, -1%); }
+            100% { transform: scale(1.05) translate(1%, 2%); }
+        }
+
+        #officeLayer::after { 
+            content: ""; position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.8) 100%); 
+            pointer-events: none; z-index: -1; 
+        }
+
+        .carousel { 
+            position: relative; width: 320px; height: 450px; 
+            transform-style: preserve-3d; 
+            /* 預設旋轉由 JS 控制，這裡保持基礎 transition */
+            transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .shelf-unit { position: absolute; width: 280px; height: 380px; left: 20px; transform-style: preserve-3d; cursor: pointer; }
+        .shelf-unit:nth-child(1) { transform: rotateY(0deg) translateZ(600px); }
+        .shelf-unit:nth-child(2) { transform: rotateY(90deg) translateZ(600px); }
+        .shelf-unit:nth-child(3) { transform: rotateY(180deg) translateZ(600px); }
+        .shelf-unit:nth-child(4) { transform: rotateY(270deg) translateZ(600px); }
+
+        .shelf-box { position: relative; width: 100%; height: 100%; background: var(--glass); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); box-shadow: inset 0 0 50px rgba(0,0,0,0.6), 0 0 30px var(--glow); transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1); transform-style: preserve-3d; border-radius: 4px; }
+        .shelf-box::before, .shelf-box::after { content: ""; position: absolute; top: 0; width: 40px; height: 100%; background: #0c0c0c; border: 1px solid rgba(255,255,255,0.05); }
+        .shelf-box::before { left: -40px; transform-origin: right; transform: rotateY(-90deg); }
+        .shelf-box::after { right: -40px; transform-origin: left; transform: rotateY(90deg); }
+
+        .shelf-content { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; overflow: hidden; border-radius: 4px; }
+        .shelf-content::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: var(--bg-img); background-size: cover; background-position: center; opacity: 0.1; filter: grayscale(100%); transition: 1s; z-index: -1; }
+        
+        .shelf-unit:hover .shelf-box { border-color: var(--accent); box-shadow: inset 0 0 20px rgba(212,175,55,0.2), 0 0 60px rgba(212,175,55,0.3); }
+        .shelf-unit:hover .shelf-content::before { opacity: 0.8; filter: grayscale(0%); }
+
+        .core-label { margin-bottom: 50px; color: #fff; letter-spacing: 12px; font-size: 1.4rem; font-weight: 200; text-shadow: 0 4px 15px #000; transition: 0.5s; text-align: center; }
+
+        /* --- 展開層 --- */
+        #shelfDetailLayer { position: absolute; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 50; background-size: cover; background-position: center; opacity: 0; transition: 1.2s; }
+        .expanded-shelf { width: 90%; max-width: 1100px; height: 480px; background: rgba(0,0,0,0.6); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-bottom: 50px solid #111; display: flex; align-items: flex-end; padding: 0 60px 20px; box-shadow: 0 50px 150px rgba(0,0,0,1); position: relative; border-radius: 8px; }
+
+        /* 書本造型 */
+        .book-spine { 
+            width: 55px; height: 0; margin: 0 12px;
+            background: linear-gradient(90deg, #1a1a1a 0%, #333 15%, #4a4a4a 50%, #333 85%, #1a1a1a 100%);
+            border-radius: 8px 8px 0 0; cursor: pointer; opacity: 0; display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1); position: relative; transform-style: preserve-3d;
+            box-shadow: 10px 0 20px rgba(0,0,0,0.6);
+        }
+        .book-spine::before {
+            content: ""; position: absolute; top: 10px; right: -5px; width: 5px; height: 95%;
+            background: linear-gradient(to bottom, #eee 0%, #ccc 100%); transform: skewY(-45deg); opacity: 0.5;
+        }
+        .book-spine::after { 
+            content: attr(data-title); writing-mode: vertical-rl; 
+            font-size: 1rem; color: rgba(212, 175, 55, 0.8); letter-spacing: 5px; 
+            transition: 0.3s; pointer-events: none; text-shadow: 0 1px 2px #000;
+        }
+        .book-spine:hover { 
+            transform: translateY(-60px) rotateY(-10deg); 
+            background: linear-gradient(90deg, #2c2410 0%, var(--accent) 50%, #2c2410 100%);
+            box-shadow: 0 20px 50px rgba(212, 175, 55, 0.5);
+        }
+
+        .book-place-animation { animation: placeBook 1.5s cubic-bezier(0.2, 1, 0.3, 1) forwards; }
+        @keyframes placeBook { 0% { opacity: 0; transform: translateY(-500px); height: 180px; } 100% { opacity: 1; transform: translateY(0); height: var(--h); } }
+
+        /* 日記彈窗 */
+        #diary-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(25px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .diary-paper { background-color: var(--paper); padding: 80px 70px; width: 90%; max-width: 780px; color: #333; position: relative; max-height: 85vh; overflow-y: auto; box-shadow: 0 30px 120px rgba(0,0,0,1); border-radius: 4px; }
+        #target-text { line-height: 2.8; font-size: 1.2rem; white-space: pre-wrap; color: #222; text-align: justify; letter-spacing: 1.8px; }
+
+        .back-btn { margin-top: 80px; cursor: pointer; opacity: 0.4; letter-spacing: 6px; transition: 0.3s; color: #fff; z-index: 60; }
+        .back-btn:hover { opacity: 1; color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+    </style>
+</head>
+<body>
+
+    <canvas id="starfield"></canvas>
+
+    <div id="homeLayer">
+        <h1>言心</h1>
+        <p style="letter-spacing: 8px; color: #888;">那些被繁星收藏的時光</p>
+        <div class="enter-btn" onclick="enterOffice()">回憶事務所</div>
+    </div>
+
+    <div id="officeLayer">
+        <div class="carousel" id="mainCarousel" onmouseenter="stopAutoRotate()" onmouseleave="startAutoRotate()">
+            <div class="shelf-unit" onmouseenter="pullToFront(0)" onclick="zoomInAndOpen('core1')">
+                <div class="shelf-box" style="--bg-img: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=800')">
+                    <div class="shelf-content"><div class="core-label">照耀我的晨光</div></div>
+                </div>
+            </div>
+            <div class="shelf-unit" onmouseenter="pullToFront(1)" onclick="zoomInAndOpen('core2')">
+                <div class="shelf-box" style="--bg-img: url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=800')">
+                    <div class="shelf-content"><div class="core-label">眼中瑣碎</div></div>
+                </div>
+            </div>
+            <div class="shelf-unit" onmouseenter="pullToFront(2)" onclick="zoomInAndOpen('core3')">
+                <div class="shelf-box" style="--bg-img: url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?auto=format&fit=crop&w=800')">
+                    <div class="shelf-content"><div class="core-label">心之所向</div></div>
+                </div>
+            </div>
+            <div class="shelf-unit" onmouseenter="pullToFront(3)" onclick="zoomInAndOpen('core4')">
+                <div class="shelf-box" style="--bg-img: url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?auto=format&fit=crop&w=800')">
+                    <div class="shelf-content"><div class="core-label">心還在那條街</div></div>
+                </div>
+            </div>
+        </div>
+        <p class="back-btn" onclick="exitOffice()">[ RETURN ]</p>
+    </div>
+
+    <div id="shelfDetailLayer">
+        <div class="expanded-shelf">
+            <div style="position: absolute; top: -70px; left: 0; font-size: 2.2rem; letter-spacing: 15px; color: var(--accent); font-weight: 200;" id="detailYearTitle">CORE</div>
+            <div id="bookContainer" style="display: flex; align-items: flex-end; width: 100%;"></div>
+        </div>
+        <p class="back-btn" onclick="closeDetailShelf()">[ BACK TO ARCHIVE ]</p>
+    </div>
+
+    <div id="diary-overlay" onclick="closeDiary()">
+        <div class="diary-paper" onclick="event.stopPropagation()">
+            <div id="target-date" style="color:#aaa; letter-spacing:4px; margin-bottom:10px;"></div>
+            <h2 id="target-title" style="font-weight:400; font-size:2rem; margin-bottom:35px; letter-spacing:8px;"></h2>
+            <div id="target-text"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentRotation = 0;
+        let autoRotateTimer = null;
+        let isAutoRotating = false;
+
+        // --- 自動旋轉邏輯 ---
+        function startAutoRotate() {
+            if (autoRotateTimer) clearInterval(autoRotateTimer);
+            isAutoRotating = true;
+            autoRotateTimer = setInterval(() => {
+                if (isAutoRotating) {
+                    currentRotation -= 0.15; // 旋轉速度，可調
+                    const carousel = document.getElementById('mainCarousel');
+                    carousel.style.transition = "none"; // 自動旋轉時關閉平滑，避免每一幀都計算補間
+                    carousel.style.transform = `rotateY(${currentRotation}deg)`;
+                }
+            }, 30);
+        }
+
+        function stopAutoRotate() {
+            isAutoRotating = false;
+            // 恢復平滑轉換，讓手動切換時有流暢感
+            document.getElementById('mainCarousel').style.transition = "transform 1.2s cubic-bezier(0.25, 1, 0.5, 1)";
+        }
+
+        function pullToFront(index) {
+            stopAutoRotate();
+            const carousel = document.getElementById('mainCarousel');
+            const targetAngle = -index * 90;
+            
+            let diff = (targetAngle - (currentRotation % 360));
+            if (diff > 180) diff -= 360;
+            if (diff < -180) diff += 360;
+            
+            currentRotation += diff;
+            carousel.style.transform = `rotateY(${currentRotation}deg)`;
+        }
+
+        // --- 核心資料 ---
+        const diaryData = {
+            "core1": { title: "長興場", background: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2022')", books: [{ date: "VOL. 1", title: "初曙", content: "那是故事最初的開始，比清晨的第一道光還要早一些..." }, { date: "VOL. 2", title: "晨曦", content: "清晨的霧氣還未散去，我在光影中看見了妳的身影。" }] },
+            "core2": { title: "眼中瑣碎", background: "url('https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?q=80&w=2026')", books: [{ date: "VOL. 3", title: "日常", content: "情感便開始在日常的瑣碎中生根。" }] },
+            "core3": { title: "心之所向", background: "url('https://images.unsplash.com/photo-1534796636912-3b95b3ab5986?q=80&w=2071')", books: [{ date: "VOL. 4", title: "靈魂", content: "有一段時間，我陷入了對未來的巨大迷茫中..." }] },
+            "core4": { title: "心還在那條街", background: "url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e?q=80&w=2071')", books: [{ date: "VOL. 5", title: "永恆", content: "時光終究會帶走很多東西，但有些溫度的記憶是永恆的。" }] }
+        };
+
+        let typingTimer = null;
+
+        function enterOffice() {
+            document.getElementById('homeLayer').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('homeLayer').style.display = 'none';
+                document.getElementById('officeLayer').style.display = 'flex';
+                setTimeout(() => {
+                    document.getElementById('officeLayer').style.opacity = '1';
+                    startAutoRotate();
+                }, 50);
+            }, 1000);
+        }
+
+        function zoomInAndOpen(coreKey) {
+            stopAutoRotate();
+            const office = document.getElementById('officeLayer');
+            const detail = document.getElementById('shelfDetailLayer');
+            const data = diaryData[coreKey];
+            
+            office.style.opacity = '0';
+            office.style.transform = 'scale(1.2) translateZ(200px)';
+
+            setTimeout(() => {
+                office.style.display = 'none';
+                detail.style.backgroundImage = data.background;
+                document.getElementById('detailYearTitle').innerText = data.title;
+                detail.style.display = 'flex';
+                setTimeout(() => detail.style.opacity = '1', 50);
+                placeBooks(data.books);
+            }, 1000);
+        }
+
+        function placeBooks(books) {
+            const container = document.getElementById('bookContainer');
+            container.innerHTML = "";
+            books.forEach((item, index) => {
+                const book = document.createElement('div');
+                book.className = 'book-spine';
+                book.setAttribute('data-title', item.title);
+                const h = Math.floor(Math.random() * 80) + 300;
+                book.style.setProperty('--h', `${h}px`);
+                book.onclick = () => showDiary(item);
+                container.appendChild(book);
+                setTimeout(() => book.classList.add('book-place-animation'), index * 150);
+            });
+        }
+
+        function showDiary(item) {
+            const overlay = document.getElementById('diary-overlay');
+            document.getElementById('target-date').innerText = item.date;
+            document.getElementById('target-title').innerText = item.title;
+            const textContainer = document.getElementById('target-text');
+            textContainer.innerHTML = "";
+            overlay.style.display = 'flex';
+            typeWriter(item.content, 'target-text', 50);
+        }
+
+        function typeWriter(text, targetId, speed) {
+            let i = 0;
+            const target = document.getElementById(targetId);
+            if (typingTimer) clearTimeout(typingTimer);
+            function type() {
+                if (i < text.length) {
+                    target.innerHTML += text.charAt(i);
+                    i++;
+                    typingTimer = setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function closeDetailShelf() {
+            const detail = document.getElementById('shelfDetailLayer');
+            const office = document.getElementById('officeLayer');
+            detail.style.opacity = '0';
+            setTimeout(() => {
+                detail.style.display = 'none';
+                office.style.display = 'flex';
+                office.style.transform = 'scale(1) translateZ(0)';
+                setTimeout(() => {
+                    office.style.opacity = '1';
+                    startAutoRotate();
+                }, 50);
+            }, 1000);
+        }
+
+        function exitOffice() {
+            stopAutoRotate();
+            document.getElementById('officeLayer').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('officeLayer').style.display = 'none';
+                document.getElementById('homeLayer').style.display = 'flex';
+                setTimeout(() => document.getElementById('homeLayer').style.opacity = '1', 50);
+            }, 1000);
+        }
+
+        function closeDiary() {
+            if (typingTimer) clearTimeout(typingTimer);
+            document.getElementById('diary-overlay').style.display = 'none';
+        }
+
+        // 星空背景畫布
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+        function initStars() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 200; i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, size: Math.random()*1.5, opacity: Math.random(), v: Math.random()*0.05});
+        }
+        function draw() {
+            ctx.clearRect(0,0,canvas.width, canvas.height); ctx.fillStyle = "#fff";
+            stars.forEach(s => { ctx.globalAlpha = s.opacity; ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI*2); ctx.fill(); s.y -= s.v; if(s.y<0) s.y=canvas.height; });
+            requestAnimationFrame(draw);
+        }
+        window.addEventListener('resize', initStars);
+        initStars(); draw();
+    </script>
+</body>
+</html>
